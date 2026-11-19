@@ -208,7 +208,7 @@ async function uploadSource(file) {
   const hash = await hashFile(file);
   markSteps("upload", ["hash"]);
   setProgress(0, "Đang tạo upload session…");
-  const init = await api("/v1/uploads/init", { method: "POST", body: {
+  const init = await api("/v1/converter/sources/init", { method: "POST", body: {
     mediaType: "video", fileName: file.name, byteSize: file.size, sha256: hash, mimeType: "video/x-matroska"
   }});
   const assetId = init?.asset?.id;
