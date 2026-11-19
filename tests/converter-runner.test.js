@@ -6,6 +6,13 @@ import { buildFfmpegArgs, classifyPlaybackInput, safePlaybackFilename } from "..
 const jobId = "11111111-2222-4333-8444-555555555555";
 const token = "signed-nnb-worker-token";
 
+const converterPageSource = await (await import("node:fs/promises")).readFile(new URL("../app.js", import.meta.url), "utf8");
+
+test("browser uploads MKV source through the converter-only asset namespace endpoint", () => {
+  assert.match(converterPageSource, /api\("\/v1\/converter\/sources\/init"/);
+  assert.doesNotMatch(converterPageSource, /api\("\/v1\/uploads\/init"/);
+});
+
 test("runner accepts only the expected signed-job dispatch shape and fixes the Media API host", () => {
   const job = validateConverterDispatchEvent({ action: "nnb-mkv-convert", client_payload: { jobId, token } });
   assert.deepEqual(job, { jobId, token, mediaApiUrl: "https://nnb-media-api.tmqdinh.workers.dev" });
