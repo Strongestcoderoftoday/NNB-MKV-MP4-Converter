@@ -1,0 +1,38 @@
+name: NNB MKV to MP4
+
+on:
+  repository_dispatch:
+    types:
+      - nnb-mkv-convert
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nnb-mkv-convert-${{ github.event.client_payload.jobId || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  convert:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Reclaim temporary runner disk space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /usr/local/lib/android
+          df -h
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 2
+          ffprobe -version | head -n 2
+      - name: Convert and upload NNB-compatible MP4
+        run: node cloudflare/transcoder/src/github-actions-converter-runner.js

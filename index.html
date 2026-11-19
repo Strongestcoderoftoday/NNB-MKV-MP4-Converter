@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Convert MKV sang MP4 đúng profile phát video của Nihon no Benkyou.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://esm.sh; style-src 'self'; img-src 'self' data:; connect-src 'self' https://ffejfkoqnastynooilvs.supabase.co https://nnb-media-api.tmqdinh.workers.dev https://esm.sh; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+  <title>NNB MKV → MP4 Converter</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/"><span class="mark">N</span><span>NNB <b>CONVERTER</b></span></a>
+      <span class="chip">CLOUD FFMPEG · MAX 4 GiB</span>
+    </header>
+
+    <section id="loginPanel" class="panel login" hidden>
+      <p class="eyebrow">NIHON NO BENKYOU</p>
+      <h1>Đăng nhập NNB</h1>
+      <p class="muted">Dùng tài khoản NNB hiện tại. Không tạo tài khoản converter riêng.</p>
+      <form id="loginForm">
+        <label for="email">Email NNB</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="password">Mật khẩu</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="primary wide" type="submit">Đăng nhập</button>
+      </form>
+      <p id="loginError" class="feedback error" hidden></p>
+    </section>
+
+    <section id="appPanel" hidden>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">VIDEO TOOLKIT</p>
+          <h1>MKV <span>→</span> MP4</h1>
+          <p class="muted">Upload lên Google Drive, convert bằng FFmpeg trên cloud, rồi lưu MP4 tương thích NNB trở lại Drive.</p>
+        </div>
+        <div class="account"><span id="accountEmail"></span><button id="signOutButton" class="ghost">Đăng xuất</button></div>
+      </section>
+
+      <section class="panel drive">
+        <div class="drive-icon">G</div>
+        <div class="drive-copy"><b>Google Drive</b><span id="driveStatus" class="muted">Đang kiểm tra…</span></div>
+        <button id="driveButton" class="secondary" disabled>Kết nối Drive</button>
+      </section>
+
+      <section class="panel converter">
+        <div class="section-head"><div><p class="eyebrow">01 / SOURCE</p><h2>Chọn file MKV</h2></div><span class="chip">File gốc được giữ</span></div>
+        <label id="dropZone" class="dropzone" for="videoFile">
+          <input id="videoFile" type="file" accept=".mkv,video/x-matroska" hidden>
+          <span class="upload-icon">↑</span>
+          <b>Kéo MKV vào đây hoặc bấm để chọn</b>
+          <small class="muted">Tối đa 4 GiB · Upload theo part 32 MiB</small>
+        </label>
+        <div id="selectedFile" class="selected" hidden>
+          <div class="file-mark">MKV</div><div class="file-copy"><b id="fileName"></b><span id="fileSize" class="muted"></span></div>
+          <button id="removeFile" class="ghost" type="button">Bỏ file</button>
+        </div>
+        <div class="profile">
+          <small>OUTPUT PROFILE</small>
+          <b>MP4 · H.264 High · AAC-LC</b>
+          <span class="muted">Tối đa 1080p / 30 FPS · yuv420p · Stereo 48 kHz · Fast Start</span>
+        </div>
+        <button id="convertButton" class="primary wide" type="button" disabled>Upload &amp; Convert</button>
+        <p id="mainFeedback" class="feedback" role="status" hidden></p>
+      </section>
+
+      <section id="progressPanel" class="panel progress" hidden>
+        <div class="section-head"><div><p class="eyebrow">02 / PROCESSING</p><h2 id="progressTitle">Đang xử lý</h2></div><b id="progressPercent" class="percent">0%</b></div>
+        <div class="track"><div id="progressBar"></div></div>
+        <div class="progress-meta"><span id="progressPhase">Đang chờ</span><span id="progressBytes"></span></div>
+        <ol id="steps">
+          <li data-step="hash">Kiểm tra SHA-256 file nguồn</li>
+          <li data-step="upload">Upload MKV lên Google Drive</li>
+          <li data-step="convert">FFmpeg remux / encode</li>
+          <li data-step="verify">Xác minh MP4</li>
+          <li data-step="download">Lưu MP4 lên Drive</li>
+        </ol>
+        <div id="downloadResult" class="download-result" hidden>
+          <div><b>MP4 đã sẵn sàng</b><span id="outputInfo" class="muted"></span></div>
+          <a id="downloadButton" class="primary" href="#" target="_blank" rel="noopener">Mở MP4</a>
+        </div>
+      </section>
+
+      <section class="history">
+        <div class="section-head"><div><p class="eyebrow">03 / ACTIVITY</p><h2>Lịch sử convert</h2></div><button id="refreshJobs" class="ghost">Làm mới</button></div>
+        <div id="jobHistory" class="history-list"></div>
+      </section>
+      <p class="footnote">File MKV nguồn và MP4 đầu ra nằm trong Google Drive của mày. Subtitle không bị nhúng hoặc chỉnh sửa. Converter không tạo Movie trong thư viện NNB và không đụng tiến độ xem.</p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
